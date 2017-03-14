@@ -35,6 +35,17 @@ type nameType struct {
 	typ  *typesp.Schema
 }
 
+func updateSchema(t *testing.T, file string, gid uint32, valid bool) {
+	b, err := ioutil.ReadFile(file)
+	require.NoError(t, err)
+	err = ParseBytes(b, gid)
+	if !valid {
+		require.Error(t, err)
+		return
+	}
+	require.NoError(t, err)
+}
+
 func checkSchema(t *testing.T, h map[string]*typesp.Schema, expected []nameType) {
 	require.Len(t, h, len(expected))
 	for _, nt := range expected {
@@ -45,7 +56,7 @@ func checkSchema(t *testing.T, h map[string]*typesp.Schema, expected []nameType)
 }
 
 func TestSchema(t *testing.T) {
-	require.NoError(t, ReloadData("testfiles/test_schema", 1))
+	updateSchema(t, "testfiles/test_schema", 1, true)
 	checkSchema(t, State().get(1).predicate, []nameType{
 		{"name", &typesp.Schema{ValueType: uint32(types.StringID)}},
 		{"address", &typesp.Schema{ValueType: uint32(types.StringID)}},
@@ -62,15 +73,15 @@ func TestSchema(t *testing.T) {
 }
 
 func TestSchema1_Error(t *testing.T) {
-	require.Error(t, ReloadData("testfiles/test_schema1", 1))
+	updateSchema(t, "testfiles/test_schema1", 1, false)
 }
 
 func TestSchema2_Error(t *testing.T) {
-	require.Error(t, ReloadData("testfiles/test_schema2", 1))
+	updateSchema(t, "testfiles/test_schema2", 1, false)
 }
 
 func TestSchema3_Error(t *testing.T) {
-	require.Error(t, ReloadData("testfiles/test_schema3", 1))
+	updateSchema(t, "testfiles/test_schema3", 1, false)
 }
 
 /*
@@ -88,22 +99,22 @@ func TestSchema6_Error(t *testing.T) {
 */
 // Correct specification of indexing
 func TestSchemaIndex(t *testing.T) {
-	require.NoError(t, ReloadData("testfiles/test_schema_index1", 1))
+	updateSchema(t, "testfiles/test_schema_index1", 1, true)
 	require.Equal(t, 2, len(State().IndexedFields(1)))
 }
 
 // Indexing can't be specified inside object types.
 func TestSchemaIndex_Error1(t *testing.T) {
-	require.Error(t, ReloadData("testfiles/test_schema_index2", 1))
+	updateSchema(t, "testfiles/test_schema_index2", 1, false)
 }
 
 // Object types cant be indexed.
 func TestSchemaIndex_Error2(t *testing.T) {
-	require.Error(t, ReloadData("testfiles/test_schema_index3", 1))
+	updateSchema(t, "testfiles/test_schema_index3", 1, false)
 }
 
 func TestSchemaIndexCustom(t *testing.T) {
-	require.NoError(t, ReloadData("testfiles/test_schema_index4", 1))
+	updateSchema(t, "testfiles/test_schema_index4", 1, true)
 	checkSchema(t, State().get(1).predicate, []nameType{
 		{"name", &typesp.Schema{ValueType: uint32(types.StringID), Tokenizer: []string{"exact"}}},
 		{"address", &typesp.Schema{ValueType: uint32(types.StringID), Tokenizer: []string{"term"}}},

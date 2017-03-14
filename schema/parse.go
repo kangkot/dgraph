@@ -17,8 +17,6 @@
 package schema
 
 import (
-	"io/ioutil"
-
 	"github.com/dgraph-io/dgraph/group"
 	"github.com/dgraph-io/dgraph/lex"
 	"github.com/dgraph-io/dgraph/protos/typesp"
@@ -26,15 +24,6 @@ import (
 	"github.com/dgraph-io/dgraph/types"
 	"github.com/dgraph-io/dgraph/x"
 )
-
-// Parse parses the schema file.
-func parse(file string, gid uint32) (rerr error) {
-	b, err := ioutil.ReadFile(file)
-	if err != nil {
-		return x.Errorf("Error reading file: %v", err)
-	}
-	return ParseBytes(b, gid)
-}
 
 // ParseBytes parses the byte array which holds the schema. We will reset
 // all the globals.
